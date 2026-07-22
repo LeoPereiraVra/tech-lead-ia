@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refinar requisitos"
+  short_description: "Refine requisitos antes da implementação"
+  default_prompt: "Use $refinar-requisitos para investigar o projeto, entrevistar-me decisão por decisão e produzir os requisitos refinados."
