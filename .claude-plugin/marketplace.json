@@ -1,0 +1,16 @@
+{
+  "name": "tech-lead-ia",
+  "description": "Ferramentas para auxiliar o techlead no dia a dia",
+  "owner": {
+    "name": "Leonardo Vieira",
+    "email": "leopereiravra@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "tech-lead-ia",
+      "source": "./plugins/tech-lead-ia",
+      "description": "Ferramentas para auxiliar o techlead no dia a dia",
+      "version": "0.1.0"
+    }
+  ]
+}

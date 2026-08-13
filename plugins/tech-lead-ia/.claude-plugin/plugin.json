@@ -1,0 +1,16 @@
+{
+  "name": "tech-lead-ia",
+  "displayName": "Tech Lead IA",
+  "description": "Ferramentas para auxiliar o techlead no dia a dia",
+  "version": "0.1.0",
+  "author": {
+    "name": "Leonardo Vieira",
+    "email": "leopereiravra@gmail.com"
+  },
+  "repository": "https://github.com/LeoPereiraVra/tech-lead-ia",
+  "keywords": [
+    "tech-lead",
+    "requisitos",
+    "produtividade"
+  ]
+}
