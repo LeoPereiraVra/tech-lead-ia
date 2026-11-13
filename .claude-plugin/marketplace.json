@@ -10,7 +10,7 @@
       "name": "tech-lead-ia",
       "source": "./plugins/tech-lead-ia",
       "description": "Ferramentas para auxiliar o techlead no dia a dia",
-      "version": "0.2.0"
+      "version": "0.3.0"
     }
   ]
 }
