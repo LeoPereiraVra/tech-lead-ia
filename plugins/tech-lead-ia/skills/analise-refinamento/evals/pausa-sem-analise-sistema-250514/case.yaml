@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: pausa-sem-analise-sistema-250514
+expected_outcome: |
+  Percebe que a validação de negócios terminou (resumo e decisões prontos) e que falta .agents/#250514/analise-sistema.md. Não refaz a validação, não escreve a análise de sistema no lugar do analista e para, explicando o que o analista precisa escrever e como continuar.
+context:
+  scaffold_script: place-files.sh

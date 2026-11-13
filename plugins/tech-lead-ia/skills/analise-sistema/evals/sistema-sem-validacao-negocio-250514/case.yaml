@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: sistema-sem-validacao-negocio-250514
+expected_outcome: |
+  Avisa que a validação de negócios não foi feita, valida analise-sistema.md contra a análise de negócios e o código, registra as dúvidas em agentes/duvidas-sistema.md e as recomendações adotadas em agentes/decisoes.md, e gera agentes/analise-sistema-final.md com requisitos arquiteturais e não funcionais que complementam a análise de negócios sem repetir as regras dela.
+context:
+  scaffold_script: place-files.sh

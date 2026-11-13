@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: rodada1-levanta-duvidas-250514
+expected_outcome: |
+  Cria .agents/#250514/agentes/duvidas-negocios.md no formato D<n> / Tipo / Na análise / Porque, com a lista de perguntas no fim. Encontra divergências reais com o código, com evidência caminho:linha, sem tratar mudanças pedidas como divergência. Não altera a pasta do analista e não gera resumo nem decisões sem respostas.
+context:
+  scaffold_script: place-files.sh

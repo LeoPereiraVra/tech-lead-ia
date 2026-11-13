@@ -1,110 +1,120 @@
 ---
 name: analise-sistema
-description: 'Etapa 2 do refinamento de requisitos. Recebe os requisitos de sistema de uma solicitação (arquivo ou texto do analista) e os confronta com a análise de negócio, com os pontos da etapa 1 e com o código. Pergunta ao usuário como tratar cada lacuna ou divergência e gera dois arquivos. O analise-sistemas.md traz requisitos funcionais e não funcionais, dúvidas e decisões, divergências aceitas e rastreabilidade. O #<card>-analise-final.md é o resumo autossuficiente que vai para o dev. Use quando o usuário passar os requisitos de sistema de um card, pedir para detalhar, levantar ou refinar requisitos depois da análise de negócio, ou pedir o documento para o dev desenvolver.'
-argument-hint: '<número do card> <caminho ou texto dos requisitos de sistema>'
+description: "Valida a análise de sistema que o analista escreveu em .agents/#<card>/analise-sistema.md contra a análise de negócios, as decisões já tomadas e o código. Avalia os tradeoffs de arquitetura, segurança, escalabilidade e manutenção, pergunta ao analista como tratar contradições, divergências e pontos faltantes, registra as decisões e gera .agents/#<card>/agentes/analise-sistema-final.md, com os requisitos arquiteturais e não funcionais que complementam a análise de negócios. Use sempre que o analista pedir para validar ou revisar a análise de sistema de um card, levantar requisitos não funcionais ou de arquitetura, ou gerar a análise final para o desenvolvimento, mesmo sem citar a skill. Não use para validar a análise de negócios (analise-validar-negocio)."
+argument-hint: "<número do card>"
 ---
 
-# Etapa 2 — Análise de sistemas
+# Análise de sistema
 
-Os requisitos de sistema dizem como a solicitação vai ser atendida no sistema. Esta etapa os confronta com a análise de negócio, com as dúvidas da etapa 1 e com o código, e resolve com o usuário tudo o que não fecha. No fim, produz dois arquivos: `analise-sistemas.md`, o registro detalhado de requisitos e decisões, e `#<card>-analise-final.md`, o resumo que vai para o dev e que se entende sozinho.
+Você atua como analista de sistemas, especialista nas linguagens e frameworks do projeto. Descubra quais são lendo `composer.json`, `package.json`, `pubspec.yaml` e os arquivos de orientação, e julgue com o olhar de quem conhece bem essas ferramentas. Para cada decisão, pense no tradeoff: o que se ganha, o que se paga e quando a escolha deixa de servir.
 
-Os recursos comuns ficam na skill irmã, em `<skills>/analise-requisitos/`, onde `<skills>` é a pasta que contém esta skill. Antes de começar, leia por inteiro:
-- `references/perguntas.md`
-- `references/analise-codigo.md`
+O foco desta etapa é a estrutura: arquitetura, dados, segurança, escalabilidade, desempenho, manutenção e compatibilidade com o que já existe. As regras de negócio já estão na análise de negócios e no resumo dela. A análise final complementa esses documentos e não os repete. O dev lê a análise de negócios para saber o que construir e esta para saber como a estrutura precisa ficar. Cada linha da análise final deve dizer algo que o dev não encontraria na análise de negócios.
+
+## Pasta da solicitação
+
+```
+.agents/#<card>/                     arquivos do analista
+.agents/#<card>/analise-sistema.md   análise de sistema escrita pelo analista (entrada desta skill)
+.agents/#<card>/agentes/             tudo o que a IA grava
+```
+
+- Grave somente em `agentes/` e não altere os arquivos do analista.
+- Não leia pastas de outras solicitações (`.agents/#<outro>/`, `.agents/analises/`, `.agents/prompts/`), a menos que o analista diga que outra solicitação complementa esta; aí leia só a indicada.
+- No terminal, ponha o caminho entre aspas (`".agents/#250514"`), porque `#` no início de uma palavra vira comentário no shell.
+
+Arquivos que esta skill grava em `agentes/` (modelos em `references/modelos.md`):
+
+| Arquivo | Conteúdo |
+|---|---|
+| `duvidas-sistema.md` | pontos encontrados na análise de sistema e perguntas, com IDs S1, S2... |
+| `decisoes.md` | as respostas do analista, como decisões S. Pode já existir com as decisões D da validação de negócios |
+| `analise-sistema-final.md` | requisitos arquiteturais e não funcionais, que vão para o desenvolvimento |
 
 ## 1. Reunir as entradas
 
-- **Pasta e card**: como na skill `analise-requisitos`.
-- **`analise-negocios.md`**, da etapa 1. Se não existir, avise que a etapa 1 não foi feita e pergunte se roda a etapa 1 antes (recomendado) ou se segue só com a análise de negócio. Seguindo sem ela, os pontos `N-xx` não existem e as checagens deles não se aplicam.
-- **Análise de negócio original**: o caminho está no cabeçalho de `analise-negocios.md`.
-- **Requisitos de sistema**, em arquivo ou texto. Sem eles, peça e espere: esta etapa não começa sem os requisitos do analista de sistemas. Se chegarem como texto, grave uma cópia fiel em `requisitos-sistema.md`, na pasta.
-- **Respostas do analista de negócio** às perguntas da etapa 1: podem vir dentro dos requisitos de sistema, numa versão nova da análise, num arquivo à parte ou na conversa. Pergunte se há respostas que ainda não estão em nenhum desses lugares.
+- **Card**: do argumento, do link do Kanboard, do nome da pasta ou da mensagem. Sem número, pergunte.
+- **`.agents/#<card>/analise-sistema.md`**: a proposta do analista, com os requisitos que ele pensou para a solução. Sem ele, peça e pare, porque esta etapa valida a proposta dele e não a inventa. Se o analista colar o texto na conversa, grave uma cópia fiel em `agentes/analise-sistema-recebida.md` e use-a.
+- **Análise de negócios**: a que estiver registrada no cabeçalho de `agentes/duvidas-negocios.md` ou do resumo. Sem esse registro, procure um arquivo na pasta `.agents/#<card>/` ou peça o caminho. Se o analista indicar o Kanboard, siga `../analise-validar-negocio/references/kanboard.md`.
+- **`agentes/analise-negocios-resumo.md` e `agentes/decisoes.md`**, da validação de negócios. Se não existirem, avise que a validação não foi feita e pergunte se ele quer rodar `analise-validar-negocio` antes (recomendado) ou seguir só com a análise de negócios. As duas skills funcionam sozinhas, mas sem a validação as dúvidas de negócio vão aparecer aqui misturadas com as de sistema.
+- Se `duvidas-negocios.md` tem perguntas sem decisão, avise: a análise de sistema vai se apoiar em pontos que o negócio ainda não decidiu.
 
-Se `analise-sistemas.md` já existe, pergunte: **Atualizar**, **Refazer do zero** ou **Parar**.
+Se `agentes/analise-sistema-final.md` já existe, pergunte se é para atualizar (quando `analise-sistema.md` ou as decisões mudaram), refazer do zero ou parar. Se `duvidas-sistema.md` tem perguntas sem decisão, retome por elas.
 
-## 2. Ler e numerar os requisitos de sistema
+## 2. Entender a estrutura atual
 
-Leia tudo até o fim. Separe os requisitos de sistema em trechos com uma demanda cada (`P-01`, `P-02`…), guardando o texto literal. Esses trechos formam a rastreabilidade e garantem que nada do que foi pedido se perca.
+O que a análise de sistema propõe só pode ser julgado contra o que existe.
 
-## 3. Procurar lacunas e divergências
+- Leia os arquivos de orientação, quando existirem: `AGENTS.md`, `.AGENTES.md`, `CLAUDE.md`, `ARCHITECTURE.md`, `README.md` e `docs/`, na raiz e nas pastas tocadas.
+- Ache a funcionalidade existente mais parecida com a que vai ser construída e use-a como padrão de referência: como ela organiza controller, regra, acesso a dados, view, permissão, log e testes. Uma solução nova que foge do padrão sem motivo custa manutenção.
+- Mapeie o que a proposta toca: telas, rotas, endpoints, tabelas, filas, jobs, permissões, configurações e outros sistemas. Repositórios citados ficam na pasta pai do projeto (`../`).
+- Procure quem mais usa o que vai mudar: outras telas, outros módulos, outros sistemas que leem a mesma tabela ou chamam o mesmo endpoint.
+- Anote branch e commit curto de cada repositório lido.
+- Com muitas áreas ou repositórios, divida a leitura entre subagentes de busca (no Claude Code, o tipo `Explore`), pedindo que devolvam o que existe com `caminho:linha`.
 
-Faça a mesma busca da etapa 1 (`analise-codigo.md`), agora em quatro frentes:
+Esta etapa é somente leitura: não altere código, banco, git nem o card.
 
-1. **Requisitos de sistema × análise de negócio**: requisito de negócio sem trecho de sistema que o atenda e fora do "Fora do escopo"; trecho que contradiz a análise; trecho que pede algo que a análise não pede.
-2. **Requisitos de sistema × código**: o que é citado existe e serve (tela, endpoint, componente, biblioteca, tabela)? O endpoint devolve os dados necessários? A tela indicada é a do perfil certo? A consulta nova continua isolada por cliente/empresa?
-3. **Pontos da etapa 1**: para cada `N-xx` que não foi descartado, veja se já tem resposta (do analista, dos requisitos de sistema ou da triagem). Os que não têm continuam abertos.
-4. **Os próprios requisitos de sistema**: contradições, termos vagos ("conforme o Figma" sem link ou sem dizer qual quadro), estados sem definição.
+## 3. Validar a análise de sistema
 
-Feche com uma varredura de requisitos implícitos, só nas dimensões que a solicitação toca: isolamento por cliente/empresa e permissões, validação e limites de entrada, falhas (API fora, erro ao salvar, tempo esgotado), dados que já existem, desempenho, compatibilidade com telas que usam o mesmo componente ou endpoint, celular e app, mensagens. Cada dimensão presente vira requisito (em geral um RNF) ou dúvida. Não invente requisito só para preencher a lista.
+Leia `references/checklist-arquitetura.md` antes deste passo. Procure:
 
-## 4. Perguntar e só seguir com a resposta
+1. **Contradição com a análise de negócios**, com o resumo ou com as decisões D: a proposta faz diferente do que o negócio pediu ou decidiu. Não decida sozinho qual vale; pergunte ao analista.
+2. **Divergência com o código**: a análise cita tabela, coluna, rota, tela, endpoint ou componente que não existe ou não é o que ela diz; o mecanismo proposto não funciona no ambiente onde vai rodar; a proposta contraria um padrão do projeto sem motivo.
+3. **Contradição interna**: dois trechos da análise de sistema que não podem valer juntos.
+4. **Ponto faltante**: algo importante que a solicitação atinge e a análise não trata. Por exemplo, telas, endpoints ou sistemas que usam o que vai mudar; requisito de negócio que exige estrutura e não tem nenhuma; dados já gravados; permissão em acesso por URL direta; scripts de banco; dependência de outra equipe.
+5. **Risco técnico**: como especialista, pese o tradeoff de cada decisão estrutural, proposta pelo analista ou implícita. Quando houver risco real (segurança, volume, acoplamento, manutenção), registre como ponto, com as alternativas e o custo de cada uma. Não troque a decisão do analista por conta própria: ele pode ter um motivo que não está escrito.
 
-Toda divergência ou lacuna que o código não resolve vai para o usuário, pela caixa de perguntas, seguindo `perguntas.md`. Não escreva requisito sobre um ponto em aberto supondo a resposta.
+Antes de registrar um ponto, passe-o pelo filtro:
+- **A resposta muda a estrutura ou o risco da entrega?** Se não muda, descarte.
+- **O código responde?** Então use o fato. Pergunta é para decisão.
+- **É regra de negócio pura, sem conflito com a proposta?** Então pertence à validação de negócios, e não a esta etapa.
+- **É relevante para esta solicitação?** Refatorar o que ninguém vai tocar fica fora.
 
-As opções típicas, quando cabem, são **Seguir a análise de negócio**, **Seguir o requisito de sistema** e **Manter como o sistema faz hoje**, cada uma com a consequência na descrição. Sempre que der, prefira opções que já tragam o resultado concreto (o texto da mensagem, o perfil, o limite).
+## 4. Perguntar e registrar
 
-Para cada `N-xx` ainda sem resposta, pergunte se o analista respondeu. As opções são:
-- **Respondeu**: o usuário escreve a resposta em "Outro";
-- **Decidir agora**: você oferece as alternativas numa pergunta seguinte;
-- **Deixar em aberto**: o ponto vai para Pendências, com a premissa adotada enquanto isso.
+Grave os pontos em `duvidas-sistema.md` (formato em `references/modelos.md`) e faça as perguntas ao analista na conversa, porque foi ele quem escreveu a análise e é quem decide.
 
-Se aparecer na conversa algo que nem a análise de negócio nem os requisitos de sistema pedem, pergunte se entra nesta solicitação (vira divergência aceita) ou fica fora do escopo.
+- No Claude Code, use `AskUserQuestion`; no Codex, `request_user_input`, quando existir. Sem ferramenta de perguntas, escreva as perguntas numeradas, com as opções em letras, e espere.
+- A pergunta se explica sozinha, com o ID no cabeçalho (`S3`). As opções são decisões concretas, e a descrição de cada uma diz o tradeoff: o que se ganha e o que se paga.
+- Quando você tem base para recomendar, a recomendada vem primeiro, com "(Recomendado)".
+- Nas contradições com o negócio, as opções típicas são: seguir a análise de negócios; seguir a análise de sistema, avisando o analista de negócios da diferença; ou outra solução.
+- Até quatro perguntas independentes por vez. Pergunta que depende de outra espera a resposta.
 
-Cada resposta vira uma decisão `D-xx`, gravada assim que chega.
+Grave cada resposta em `decisoes.md` assim que chegar, como entrada S, com a regra que passa a valer, quem decidiu e o que muda. Não espere o fim, porque a conversa pode ser compactada e o arquivo não.
 
-## 5. Registrar a divergência aceita
+Se o analista pedir para seguir sem responder ("segue com a tua recomendação"), registre a recomendação como decisão, com "Quem decidiu: recomendação aceita pelo analista". Se ele deixar um ponto para depois, registre como pendência, com o que falta decidir e quem decide.
 
-O usuário pode responder contra a análise de negócio. Isso é aceitável, e o arquivo deixa explícito. Na tabela "Divergências aceitas da análise de negócio" entram o que a análise diz, o que fica valendo, o motivo e quem decidiu. Sem esse registro, a etapa 3 e o dev tratariam a diferença como erro.
+Depois das respostas, revalide os pontos afetados: uma decisão pode abrir outro ponto. Repita até não sobrar pergunta.
 
-## 6. Escrever `analise-sistemas.md`
+## 5. Escrever `analise-sistema-final.md`
 
-Use o modelo `assets/analise-sistemas.md` desta skill. Orientações por seção:
-- **Objetivo**: um parágrafo com o que existe hoje, o que muda e o resultado para o usuário.
-- **Escopo**: o que está incluído e o que fica fora, cada exclusão com motivo e decisão.
-- **Comportamento atual**: os fatos do código que o dev precisa conhecer para não quebrar nada, agrupados por assunto e em linguagem de quem usa o sistema.
-- **Atores e permissões**: cada perfil e o que ele vê e faz.
-- **Requisitos funcionais (RF)**: título com verbo e resultado; regras, dados e exceções; critérios de aceite no formato "Dado…, quando…, então…", com valores concretos (texto exato, número, perfil); origem (`P-xx`, `Req. n`, `N-xx`, `D-xx`). Cada RF é um comportamento que pode ser entregue e conferido sozinho.
-- **Requisitos não funcionais (RNF)**: "Categoria: resultado", mensurável, com verificação e origem. O RNF implícito confirmado pelo usuário tem origem "Implícito (confirmado pelo usuário)".
-- **Dúvidas e decisões**: é o mapa de dúvidas e respostas das duas etapas. Toda pergunta feita e toda resposta dada entram, com quem decidiu, a origem (`N-xx` ou "etapa de sistema") e os requisitos afetados.
-- **Divergências aceitas da análise de negócio**: ver o passo 5.
-- **Premissas**: o que foi adotado sem confirmação explícita, com o motivo.
-- **Cobertura da análise de negócio**: cada requisito da análise de negócio e o que o atende (RF, RNF, fora do escopo ou divergência aceita).
-- **Rastreabilidade dos requisitos de sistema**: cada `P-xx` e o que o atende.
-- **Pendências**: "Nenhuma." ou o que ficou em aberto por decisão do usuário, com quem decide.
+Use o modelo de `references/modelos.md`.
 
-## 7. Conferência final antes do arquivo do dev
+- **Complementa, não repete.** Não reescreva regras de negócio, textos de tela, colunas de grid nem layout. Quando um requisito técnico atende uma regra, cite o requisito do resumo (RF-03) ou da análise de negócios (Req. 3).
+- **Cada requisito é uma decisão de estrutura ou uma qualidade verificável.** Diga o quê, onde (sistema, módulo, tabela ou arquivo), por quê (o motivo e, quando houve escolha, a alternativa descartada em uma linha) e como verificar.
+- **Arquitetura** cobre a forma da solução: onde fica cada responsabilidade, o que é reaproveitado, como os módulos e os sistemas conversam. **Não funcionais** cobre segurança, desempenho e escalabilidade, manutenção, compatibilidade, observabilidade e usabilidade técnica (celular).
+- **Sem trechos de código**, exceto um exemplo curto que tire uma dúvida (o formato de um registro, por exemplo). Caminho de arquivo só quando ajuda a localizar o trabalho ou o risco.
+- **Nada novo.** Tudo vem de `analise-sistema.md`, das decisões ou de fatos do código. O que você acha importante e o analista não decidiu vira pergunta, e não requisito.
+- **Tamanho:** o necessário para o dev montar a estrutura sem reabrir as perguntas. Se uma seção está contando de novo a análise de negócios, corte. Seção sem conteúdo sai do arquivo.
 
-Rode e corrija os ERROs:
+## 6. Conferir antes de entregar
 
-```bash
-python3 "<skills>/analise-requisitos/scripts/verificar.py" sistema ".agents/analises/#<card>"
-```
+Releia a análise final ao lado das fontes e procure:
+- item de `analise-sistema.md` sem destino: ele precisa estar na análise final ou numa decisão que o descartou;
+- decisão S que não aparece na análise final com o conteúdo decidido;
+- requisito da análise final que contradiz a análise de negócios, o resumo ou uma decisão D, sem ser uma divergência decidida;
+- requisito de negócio que precisa de estrutura e não tem nenhuma;
+- pergunta S sem decisão e fora das pendências.
 
-Depois, releia a análise de negócio original lado a lado com `analise-sistemas.md` e procure:
-- requisito ou caso de teste da análise sem destino na cobertura;
-- caso de teste da análise que nenhum critério de aceite garante e que não é divergência aceita;
-- `N-xx` sem resposta e fora das pendências;
-- decisões que se contradizem;
-- pendências que impedem o dev de começar.
+Se encontrar algo, pergunte ao analista ou corrija, e confira de novo.
 
-Se encontrar algo, pergunte ao usuário como seguir, atualize o arquivo e repita a conferência.
+## 7. Encerrar
 
-## 8. Escrever `#<card>-analise-final.md`
+Diga ao analista o caminho da análise final, quantos requisitos arquiteturais e não funcionais ela tem, quantas decisões S foram registradas e as pendências. Lembre que o desenvolvimento recebe a análise de negócios (ou o resumo) junto com a análise final, porque uma complementa a outra.
 
-Este é o único arquivo que vai para o dev. Ele não leu nada do que veio antes e não vai receber os outros arquivos. Use o modelo `assets/analise-final.md` desta skill e grave em `.agents/analises/#<card>/#<card>-analise-final.md`.
+## Princípios
 
-- **Contexto** vem primeiro: quem usa, o problema de hoje, o que muda, onde (sistema, módulo, tela, perfis) e o que continua igual. Quem lê só essa seção entende a entrega.
-- Depois vem uma seção por área, tela ou funcionalidade, com o que fazer: regras, casos, mensagens com o texto exato, permissões, estados (vazio, erro). Só o que foi decidido.
-- **Restrições**: as decisões técnicas dos requisitos de sistema (biblioteca, endpoint, isolamento por cliente/empresa, desempenho, compatibilidade).
-- **Em aberto**: só quando o usuário aceitou deixar algo para depois; diz o que falta decidir e o que fazer enquanto isso.
-- **Fora do escopo**: o que o dev não deve fazer, mesmo que pareça natural.
-- Sem IDs (`RF-`, `D-`, `P-`, `N-`, `Req.`) e sem citar os outros arquivos nem "a análise": o arquivo vale por si.
-- Sem trechos de código, exceto exemplos curtos que tirem uma dúvida (um formato de dado, um exemplo de resposta). Caminhos de tela, rota ou endpoint podem aparecer quando ajudam a localizar onde trabalhar.
-- Cores e medidas, só quando são regra (ex.: vencido em vermelho) e não há protótipo. Havendo protótipo, cite o link.
-- Nada novo: tudo o que está aqui está em `analise-sistemas.md`.
-
-Rode `verificar.py final` na pasta e corrija.
-
-## 9. Encerrar
-
-Diga ao usuário os caminhos dos dois arquivos, quantos RF e RNF foram escritos, quantas decisões e divergências aceitas há, e as pendências. Se esta skill foi chamada pela `analise-requisitos`, volte para ela, que roda a validação em seguida. Se foi chamada sozinha, sugira rodar `/analise-validar`.
+- **Fato se procura, decisão se pergunta.**
+- **Sem invenção.** "O sistema faz X hoje" só com evidência do código (`caminho:linha`).
+- **Divergir pode, sem explicação não.** O analista pode decidir contra a análise de negócios. A decisão registra o que o negócio pedia, o que vale e por quê.
+- **O arquivo é a memória.** Tudo o que importa fica em `agentes/`.
+- **Português do Brasil** nas mensagens, nas perguntas e nos arquivos.

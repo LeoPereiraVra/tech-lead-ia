@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: rodada2-registra-decisoes-250514
+expected_outcome: |
+  Registra as respostas D1 a D8 em .agents/#250514/agentes/decisoes.md como decisões escritas, marcando D2 e D6 como divergentes da análise. Revalida a análise com as decisões e então gera agentes/analise-negocios-resumo.md com requisitos funcionais curtos e a seção de diferenças, ou acrescenta uma rodada 2 com IDs a partir de D9.
+context:
+  scaffold_script: place-files.sh
